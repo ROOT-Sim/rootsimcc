@@ -15,5 +15,6 @@ file_text = re.sub(r"SPDX-FileCopyrightText: 2008-([0-9]{4}) HPDCS Group .*>",
 
 # TODO: improve the spdx license substitution
 file_text = re.sub(r"SPDX-License-Identifier:.*", "", file_text)
+file_text = re.sub(r"SPDX-FileCopyrightText:", "@copyright", file_text)
 
 print(file_text)

@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: ROOT-Sim
 Upstream-Contact: HPDCS Group <rootsim@googlegroups.com>
-Source: https://github.com/ROOT-Sim/core
+Source: https://github.com/ROOT-Sim/rootsimcc
 
 Files: docs/*
 Copyright: 2008-2021 HPDCS Group <rootsim@googlegroups.com>
@@ -30,4 +30,3 @@ License: CC0-1.0
 Files: README.md
 Copyright: 2008-2021 HPDCS Group <rootsim@googlegroups.com>
 License: GPL-3.0-only
-

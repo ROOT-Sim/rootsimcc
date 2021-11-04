@@ -107,7 +107,7 @@ static unsigned int expected_tokens[] = {JSMN_OBJECT, JSMN_STRING, JSMN_PRIMITIV
 					 JSMN_OBJECT, JSMN_STRING, JSMN_ARRAY, JSMN_PRIMITIVE, JSMN_PRIMITIVE,
 					 JSMN_PRIMITIVE, JSMN_PRIMITIVE, JSMN_PRIMITIVE, JSMN_PRIMITIVE};
 
-static void check_loaded_struct(struct conf *configuration)
+static int check_loaded_struct(struct conf *configuration)
 {
 	assert(configuration->id == 1);
 	assert(strcmp(configuration->type, "donut") == 0);
@@ -148,15 +148,17 @@ static void check_loaded_struct(struct conf *configuration)
 
 }
 
-static void autoconf_test(void)
+static int autoconf_test_from_string(void)
 {
 	struct conf configuration;
 	memset(&configuration, 0, sizeof(configuration));
 	assert(load_json_from_string(&configuration, conf_file) == 0);
-	check_loaded_struct(&configuration);
+	assert(check_loaded_struct(&configuration) == 0);
+
+	check_passed_asserts();
 }
 
-static void autoconf_test_from_file(void)
+static int autoconf_test_from_file(void)
 {
 	struct conf configuration;
 	FILE *tmp = tmpfile();
@@ -165,10 +167,12 @@ static void autoconf_test_from_file(void)
 	fputs(conf_file, tmp);
 
 	assert(load_json_from_file(&configuration, tmp) == 0);
-	check_loaded_struct(&configuration);
+	assert(check_loaded_struct(&configuration) == 0);
+
+	check_passed_asserts();
 }
 
-static void jsmn_test(void)
+static int jsmn_test(void)
 {
 	jsmn_parser parser;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
@@ -183,14 +187,17 @@ static void jsmn_test(void)
 	// Check the expected tokenization sequence
 	for(int i = 0; i < r; i++)
 		assert(t[i].type == expected_tokens[i]);
+
+	check_passed_asserts();
 }
 
-static int reflect_test(void)
+int main(void)
 {
-	jsmn_test();
-	autoconf_test();
-	autoconf_test_from_file();
-	return 0;
-}
+	init();
 
-const struct test_config test_config = {.threads_count = 1, .test_fnc = reflect_test};
+	test("Testing JSON token parser", jsmn_test);
+	test("Testing autoconf from string", autoconf_test_from_string);
+	test("Testing autoconf from file", autoconf_test_from_file);
+
+	finish();
+}

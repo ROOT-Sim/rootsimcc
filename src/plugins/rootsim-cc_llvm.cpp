@@ -8,10 +8,9 @@
  * SPDX-FileCopyrightText: 2008-2021 HPDCS Group <rootsim@googlegroups.com>
  * SPDX-License-Identifier: GPL-3.0-only
  */
-#include <compiler/rootsim-cc_llvm.hpp>
+#include <plugins/rootsim-cc_llvm.hpp>
 
 extern "C" {
-#include <log/log.h>
 #include <lib/config/reflect.h>
 }
 

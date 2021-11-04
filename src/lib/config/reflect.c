@@ -11,13 +11,13 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 #include <lib/config/reflect.h>
-#include <datatypes/vector.h>
-#include <mm/mm.h>
 
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <datatypes/vector.h>
 
 //! This is populated by the rootsim compiler
 extern struct autoconf_name_map autoconf_structs[];
@@ -281,7 +281,7 @@ static inline char *json_substr(const char *src, size_t nchars)
 		return NULL;
 	}
 
-	char *dup = mm_alloc(nchars + 1);
+	char *dup = malloc(nchars + 1);
 	memcpy(dup, src, nchars);
 	dup[nchars] = '\0';
 	return dup;
@@ -352,7 +352,7 @@ static void *load_json_array(unsigned arr_type, const jsmntok_t *tokens, const j
 	struct gnt_closure_t closure = GNT_CLOSURE_INITIALIZER;
 	const jsmntok_t *t_aux;
 
-	void *element = mm_alloc(memb_size);
+	void *element = malloc(memb_size);
 	if(!element) {
 		abort();
 	}
@@ -378,7 +378,7 @@ static void *load_json_array(unsigned arr_type, const jsmntok_t *tokens, const j
 		push_back(v, element);
 	}
 
-	mm_free(element);
+	free(element);
 	return freeze_vector(v);
 }
 
@@ -410,7 +410,7 @@ load_json_array_of_objects(const char *struct_name, size_t struct_size, const js
 	struct gnt_closure_t closure = GNT_CLOSURE_INITIALIZER;
 	const jsmntok_t *t_aux;
 
-	void *element = mm_alloc(struct_size);
+	void *element = malloc(struct_size);
 	if(!element) {
 		abort();
 	}
@@ -423,13 +423,13 @@ load_json_array_of_objects(const char *struct_name, size_t struct_size, const js
 
 		if(load_json_object(element, struct_name, tokens, t_aux, json_string) < 0) {
 			free_vector(v);
-			mm_free(element);
+			free(element);
 			return NULL;
 		}
 		push_back(v, element);
 	}
 
-	mm_free(element);
+	free(element);
 	return freeze_vector(v);
 }
 
@@ -490,7 +490,7 @@ static int load_json_object(void *struct_ptr, const char *struct_name, c_jsmntok
 				break;
 
 			case AUTOCONF_OBJECT:
-				*(void **) (base_address + curr->offset) = mm_alloc(curr->struct_size);
+				*(void **) (base_address + curr->offset) = malloc(curr->struct_size);
 				memset(*(void **) (base_address + curr->offset), 0, curr->struct_size);
 				t = get_value_token_by_key(tokens, json_string, obj, curr->member);
 				ret = load_json_object(*(void **) (base_address + curr->offset), curr->struct_name,
@@ -559,7 +559,7 @@ int load_json_from_string(void *struct_ptr, const char *json_string)
 		return -2;
 	}
 
-	tokens = mm_alloc(sizeof(jsmntok_t) * (size_t) tokens_cnt);
+	tokens = malloc(sizeof(jsmntok_t) * (size_t) tokens_cnt);
 	jsmn_init(&parser);
 	if(jsmn_parse(&parser, json_string, strlen(json_string), tokens, tokens_cnt) != tokens_cnt) {
 		ret = -3;
@@ -572,7 +572,7 @@ int load_json_from_string(void *struct_ptr, const char *json_string)
 	}
 
     out:
-	mm_free(tokens);
+	free(tokens);
 	return ret;
 }
 
@@ -611,7 +611,7 @@ int load_json_from_file(void *struct_ptr, FILE *file)
 		goto out;
 	}
 
-	buffer = mm_alloc(file_len + 1);
+	buffer = malloc(file_len + 1);
 	if(!buffer) {
 		goto out;
 	}
@@ -624,7 +624,7 @@ int load_json_from_file(void *struct_ptr, FILE *file)
 	ret = load_json_from_string(struct_ptr, buffer);
 
     out:
-	mm_free(buffer);
+	free(buffer);
 	return ret;
 }
 
