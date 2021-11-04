@@ -1,4 +1,4 @@
-name: ROOT-Sim core CI
+name: ROOT-Sim argparse CI
 
 on:
   push:
@@ -82,4 +82,3 @@ jobs:
       run: cat builddir/meson-logs/meson-log.txt
     - name: Run tests
       run: meson test -C builddir/ -v
-

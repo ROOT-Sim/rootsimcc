@@ -20,14 +20,15 @@ add_executable(rootsimcc
         src/compiler/rootsimcc.c
 )
 
-add_library(meminstr SHARED
+add_library(rsmeminstr SHARED
         src/plugins/rootsim-cc_llvm.cpp
 )
 
-add_library(reflect STATIC
+add_library(rsmodelconfig STATIC
         src/lib/config/jsmn.c
         src/lib/config/reflect.c
         src/datatypes/vector.c
+        src/lib/argparse/argparse.c
 )
 
 # Run the tests
