@@ -1,0 +1,26 @@
+name: Code Coverage
+
+on:
+  push
+
+jobs:
+  code_coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch rootsimcc repository
+        uses: actions/checkout@v2
+      - name: Build & Test
+        uses: ashutoshvarma/action-cmake-build@master
+        with:
+          build-dir: ${{ runner.workspace }}/build
+          cc: gcc
+          build-type: Debug
+          configure-options: -DCMAKE_C_FLAGS=--coverage
+          run-test: true
+      - name: Generate coverage report
+        run: find ${{ runner.workspace }}/build/ -name "*.gcda" -exec gcov -abcfu {} \;
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          verbose: true
