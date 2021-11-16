@@ -6,27 +6,21 @@ on:
     - cron: "0 2 * * 1"
 
 jobs:
-  prepare:
-    runs-on: windows-latest
-    steps:
-      - name: Set up Clang
-        uses: egor-tensin/setup-clang@v1
-
   build_and_test:
-    needs: prepare
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-
+        compiler: [ clang, gcc ]
+        type: [ Debug, Release ]
     steps:
-      - name: Fetch rootsimcc repository
+      - name: Checkpout repository
         uses: actions/checkout@v2
       - name: Build & Test
-        uses: ashutoshvarma/action-cmake-build@master
+        uses: ROOT-Sim/ci-actions/cmake@master
         with:
           build-dir: ${{ runner.workspace }}/build
-          cc: clang
-          build-type: Debug
+          cc: ${{ matrix.compiler }}
+          build-type: ${{ matrix.type }}
           run-test: true
