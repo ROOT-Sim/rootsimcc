@@ -9,21 +9,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
-      - uses: BSFishy/pip-action@v1
-        with:
-          packages:
-            coverxygen
-      - name: Get Doxygen
-        run: sudo apt-get install -y doxygen
+      - name: Initialize Environment
+        uses: ROOT-Sim/ci-actions/init@v1
       - name: Generate Documentation
-        uses: ashutoshvarma/action-cmake-build@master
+        uses: ROOT-Sim/ci-actions/docs@v1
+      - name: Documentation Coverage
+        uses: ROOT-Sim/ci-actions/docs-coverage@v1
         with:
-          build-dir: ${{ runner.workspace }}/build
-          target: doc
-          build-type: Debug
-          run-test: false
-      - name: Inspect Documentation
-        run: ./scripts/doc_coverage.py -b ${{ runner.workspace }}/build -g
+          build-path: docs
       - name: Comment PR
         uses: actions/github-script@v3
         with:

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21.3)
+cmake_minimum_required(VERSION 3.10)
 project(rootsimcc LANGUAGES C CXX)
 set(PROJECT_VERSION 3.0.0-alpha.3)
 set(PROJECT_DESCRIPTION "The ROOT-Sim C Compiler")
@@ -11,7 +11,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Clang REQUIRED)
+find_package(LLVM REQUIRED CONFIG)
+find_package(CLANG REQUIRED CONFIG)
 
 include_directories(src)
 
