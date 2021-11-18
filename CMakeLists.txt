@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2008-2021 HPDCS Group <rootsim@googlegroups.com>
+# SPDX-License-Identifier: GPL-3.0-only
 cmake_minimum_required(VERSION 3.10)
 project(rootsimcc LANGUAGES C CXX)
 set(PROJECT_VERSION 3.0.0-alpha.3)
