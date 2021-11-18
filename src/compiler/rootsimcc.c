@@ -17,6 +17,8 @@
 #include <assert.h>
 #include <stdarg.h>
 
+#include <datatypes/dynstr.h>
+
 #ifndef ROOTSIM_OPTIMIZATION_OPTIONS
 /// The optimization options to be used when compiling models
 /** This macro is filled in at build time */
@@ -42,83 +44,20 @@
 #endif
 
 static const char *cmd_line_plugin = "-fplugin=%s/librootsim-cc_llvm.so ";
-static const char *cmd_line_libraries = "-Wl,--as-needed -lrootsim -lrootsim-mods -lm -lpthread";
+static const char *cmd_line_libraries = "-Wl,--as-needed -lrscore -lm -lpthread";
 
 /// The path to the ROOT-Sim include directory. Can be overridden with -rsinc at command line
 const char *include_path = ROOTSIM_INC_DIR;
 /// The path to the ROOT-Sim library path. Can be overridden with -rslib at command line
 const char *lib_path = ROOTSIM_LIB_DIR;
 
-/**
- * @brief A simple dynamic string data structure to assemble command line arguments
- */
-struct dynstr {
-	char *buff; ///< The current string
-	size_t size; ///< The total number of available characters
-	size_t used; ///< The current number of used characters
-};
 
 /// The dynamic string to build the compiling command line
-struct dynstr command_line;
+struct dynstr *command_line;
 
 /// The dynamic string to keep user-specified arguments
-struct dynstr user_args;
+struct dynstr *user_args;
 
-/**
- * @brief A version of strcat() working on struct dynstr
- * @param cmd The dynamic string where to perform the cat
- * @param src The string to cat
- * @param len The length of the string to cat
- */
-static void cmdline_strcat(struct dynstr *cmd, const char *src, size_t len)
-{
-	while(cmd->used + len >= cmd->size) {
-		cmd->size *= 2;
-		cmd->buff = realloc(cmd->buff, cmd->size);
-	}
-
-	strncat(cmd->buff, src, len);
-	cmd->used += len;
-}
-
-/**
- * @brief Function to assemble a string to append to a dynamic string
- *
- * @param cmd The dynamic string to append the generated string to
- * @param fmt The format string (printf-like)
- * @param ... A variable number of arguments
- */
-static void cmdline_printcat(struct dynstr *cmd, const char *fmt, ...)
-{
-	va_list args;
-
-	va_start(args, fmt);
-	size_t len = vsnprintf(NULL, 0, fmt, args);
-	va_end(args);
-
-	char buffer[len + 1];
-
-	va_start(args, fmt);
-	vsprintf(buffer, fmt, args);
-	va_end(args);
-
-	cmdline_strcat(cmd, buffer, len);
-}
-
-/**
- * @brief Initialize a dynamic string
- * @param cmd The dynamic string to initialize
- * @param len The initial size of the buffer
- */
-static void cmdline_init(struct dynstr *cmd, size_t len)
-{
-	assert(len > 0);
-	cmd->buff = malloc(len);
-	cmd->buff[0] = '\0';
-	cmd->size = len;
-	cmd->used = 1;
-
-}
 
 /**
  * @brief The main entry point of the custom compiler
@@ -131,8 +70,8 @@ int main(int argc, char **argv)
 	int ret = 0;
 	++argv;
 
-	cmdline_init(&command_line, 512);
-	cmdline_init(&user_args, 64);
+	dynstr_init(&command_line, 512);
+	dynstr_init(&user_args, 64);
 
 	while (*argv) {
 		if(strcmp(*argv, "-rsinc") == 0) {
@@ -146,27 +85,27 @@ int main(int argc, char **argv)
 			continue;
 		}
 
-		cmdline_strcat(&user_args, *argv, strlen(*argv));
-		cmdline_strcat(&user_args, " ", 1);
+		dynstr_strcat(user_args, *argv, strlen(*argv));
+		dynstr_strcat(user_args, " ", 1);
 		++argv;
 	}
 
 	// Assemble the final command
-	cmdline_printcat(&command_line, "%s %s -I%s -L%s ", ROOTSIM_CC, ROOTSIM_OPTIMIZATION_OPTIONS, include_path, lib_path);
-	cmdline_printcat(&command_line, cmd_line_plugin, lib_path);
-	cmdline_strcat(&command_line, user_args.buff, user_args.used);
-	cmdline_strcat(&command_line, cmd_line_libraries, strlen(cmd_line_libraries));
+	dynstr_printcat(command_line, "%s %s -I%s -L%s ", ROOTSIM_CC, ROOTSIM_OPTIMIZATION_OPTIONS, include_path, lib_path);
+	dynstr_printcat(command_line, cmd_line_plugin, lib_path);
+	dynstr_printcat(command_line, dynstr_getbuff(user_args), dynstr_getbuff(user_args));
+	dynstr_printcat(command_line, cmd_line_libraries, strlen(cmd_line_libraries));
 
-	if (system(command_line.buff)) {
-#if LOG_LEVEL <= LOG_DEBUG
-		fprintf(stderr, "Failed to run: %s\n", command_line.buff);
+	if (system(dynstr_getbuff(command_line))) {
+#ifndef NDEBUG
+		fprintf(stderr, "Failed to run: %s\n", dynstr_getbuff(command_line));
 #else
 		fprintf(stderr, "Failed to run: " ROOTSIM_CC "\n");
 #endif
 		ret = -1;
 	}
 
-	free(user_args.buff);
-	free(command_line.buff);
+	dynstr_fini(&user_args);
+	dynstr_fini(&command_line);
 	return ret;
 }

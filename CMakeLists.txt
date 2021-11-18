@@ -6,9 +6,9 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 add_definitions(-DROOTSIM_VERSION=${PROJECT_VERSION})
 
-set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(LLVM REQUIRED CONFIG)
@@ -19,13 +19,14 @@ include_directories(src)
 # Build the compiler, the plugins, the userspace libraries
 add_executable(rootsimcc
         src/compiler/rootsimcc.c
+        src/datatypes/dynstr.c
 )
 
 add_library(rsmeminstr SHARED
         src/plugins/rootsim-cc_llvm.cpp
 )
 
-add_library(rsmodelconfig STATIC
+add_library(rsmodel STATIC
         src/lib/config/jsmn.c
         src/lib/config/reflect.c
         src/datatypes/vector.c
