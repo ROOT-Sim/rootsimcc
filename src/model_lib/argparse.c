@@ -1,5 +1,5 @@
 /**
- * @file argparse/arg_parse.c
+ * @file model_lib/argparse.c
  *
  * @brief Command line option parser
  *
@@ -8,7 +8,7 @@
  * SPDX-FileCopyrightText: 2008-2021 HPDCS Group <rootsim@googlegroups.com>
  * SPDX-License-Identifier: GPL-3.0-only
  */
-#include <lib/argparse/argparse.h>
+#include <model_lib/argparse.h>
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -46,12 +46,9 @@ enum internal_opt_key {
 };
 
 /// The internal struct ap_option used to handle base options
-static struct ap_option ap_internal_opts[] = {
-	{"help", AP_HELP, NULL, "Give this help list"},
-	{"usage", AP_USAGE, NULL, "Give a short usage message"},
-	{"version", AP_VERSION, NULL, "Print program version"},
-	{0}
-};
+static struct ap_option ap_internal_opts[] = {{"help", AP_HELP, NULL, "Give this help list"},
+    {"usage", AP_USAGE, NULL, "Give a short usage message"}, {"version", AP_VERSION, NULL, "Print program version"},
+    {0}};
 
 /**
  * @brief Compares two ap_option structs alphabetically
@@ -60,7 +57,7 @@ static struct ap_option ap_internal_opts[] = {
  * @return a positive or negative value if a is respectively before or after b,
  *         0 otherwise (should never happen with correct options specifications)
  */
-static int cmp_opts (const void *a, const void *b)
+static int cmp_opts(const void *a, const void *b)
 {
 	const struct ap_option *oa = a, *ob = b;
 	return strcmp(oa->name, ob->name);
@@ -73,11 +70,11 @@ static int cmp_opts (const void *a, const void *b)
  * @return a positive or negative value if a must be considered respectively
  *         before or after b, 0 otherwise
  */
-static int cmp_sects (const void *a, const void *b)
+static int cmp_sects(const void *a, const void *b)
 {
 	const struct ap_section *oa = a, *ob = b;
 
-	if (oa->header == NULL || ob->header == NULL) {
+	if(oa->header == NULL || ob->header == NULL) {
 		return (ob->header == NULL) - (oa->header == NULL);
 	}
 
@@ -96,11 +93,12 @@ static void print_indented_string(const char *str, int curr_i, int indent)
 {
 	const char *p = str;
 
-	while (*p) {
-		while (*p && !isspace(*p)) ++p;
+	while(*p) {
+		while(*p && !isspace(*p))
+			++p;
 
 		int l = p - str;
-		if (l + curr_i > SCREEN_LENGTH) {
+		if(l + curr_i > SCREEN_LENGTH) {
 			printf("\n%*c", indent, ' ');
 			curr_i = indent;
 		}
@@ -108,11 +106,11 @@ static void print_indented_string(const char *str, int curr_i, int indent)
 		curr_i += l;
 
 		while(*p && isspace(*p)) {
-			if (*p == '\n' || curr_i >= SCREEN_LENGTH) {
+			if(*p == '\n' || curr_i >= SCREEN_LENGTH) {
 				printf("\n%*c", indent, ' ');
 				curr_i = indent;
 			}
-			if (*p != '\n') {
+			if(*p != '\n') {
 				putchar(*p);
 				++curr_i;
 			}
@@ -130,22 +128,19 @@ static void print_indented_string(const char *str, int curr_i, int indent)
  */
 static void print_help_option(const char *name, const char *arg, const char *doc)
 {
-	int l = printf("%*c--%s%s%s", HELP_INDENT, ' ',
-		       name, arg ? "=" : "", arg ? arg : "");
+	int l = printf("%*c--%s%s%s", HELP_INDENT, ' ', name, arg ? "=" : "", arg ? arg : "");
 
-	if (l > HELP_OPT_LEN_MAX + HELP_INDENT) {
+	if(l > HELP_OPT_LEN_MAX + HELP_INDENT) {
 		l = HELP_OPT_LEN_MIN + HELP_SPACES_MIN + HELP_INDENT;
 		printf("\n%*c", l, ' ');
-	} else if (l < HELP_OPT_LEN_MIN + HELP_INDENT) {
-		l += printf("%*c", HELP_OPT_LEN_MIN + HELP_SPACES_MIN +
-			    HELP_INDENT - l, ' ');
+	} else if(l < HELP_OPT_LEN_MIN + HELP_INDENT) {
+		l += printf("%*c", HELP_OPT_LEN_MIN + HELP_SPACES_MIN + HELP_INDENT - l, ' ');
 	} else {
 		l += printf("%*c", HELP_SPACES_MIN, ' ');
 	}
 
 	if(doc)
-		print_indented_string(doc, l, HELP_OPT_LEN_MIN +
-				      HELP_SPACES_MIN + HELP_INDENT);
+		print_indented_string(doc, l, HELP_OPT_LEN_MIN + HELP_SPACES_MIN + HELP_INDENT);
 
 	puts("");
 }
@@ -162,18 +157,18 @@ static void print_help(void)
 	do {
 		struct ap_option *o = s->opts;
 
-		if (!o->name)
+		if(!o->name)
 			continue;
 
-		if (s->header)
+		if(s->header)
 			printf(" %s\n", s->header);
 
 		do {
 			print_help_option(o->name, o->arg, o->doc);
-		} while ((++o)->name);
+		} while((++o)->name);
 
 		puts("");
-	} while ((s++)->opts != ap_internal_opts);
+	} while((s++)->opts != ap_internal_opts);
 
 	printf("Report bugs to %s.\n", ap_settings->prog_report);
 }
@@ -187,10 +182,9 @@ static void print_help(void)
  */
 static int print_usage_option(const char *name, const char *arg, int curr_i)
 {
-	int l = snprintf(NULL, 0, " [--%s%s%s]", name,
-			 arg ? "=" : "", arg ? arg : "");
+	int l = snprintf(NULL, 0, " [--%s%s%s]", name, arg ? "=" : "", arg ? arg : "");
 
-	if (curr_i + l > SCREEN_LENGTH) {
+	if(curr_i + l > SCREEN_LENGTH) {
 		printf("\n%*c", USAGE_INDENT, ' ');
 		curr_i = l + USAGE_INDENT;
 	} else {
@@ -214,12 +208,12 @@ static void print_usage(void)
 	do {
 		struct ap_option *o = s->opts;
 
-		while (o->name) {
+		while(o->name) {
 			curr_i = print_usage_option(o->name, o->arg, curr_i);
 			++o;
 		}
 
-	} while ((s++)->opts != ap_internal_opts);
+	} while((s++)->opts != ap_internal_opts);
 
 	puts("");
 }
@@ -233,18 +227,18 @@ static void print_usage(void)
 static void internal_opt_parse(int key, const char *arg)
 {
 	(void)arg;
-	switch (key) {
-		case AP_HELP:
-			print_help();
-			break;
-		case AP_USAGE:
-			print_usage();
-			break;
-		case AP_VERSION:
-			puts(ap_settings->prog_version);
-			break;
-		default:
-			return;
+	switch(key) {
+	case AP_HELP:
+		print_help();
+		break;
+	case AP_USAGE:
+		print_usage();
+		break;
+	case AP_VERSION:
+		puts(ap_settings->prog_version);
+		break;
+	default:
+		return;
 	}
 	exit(0);
 }
@@ -258,12 +252,12 @@ static void sort_and_setup_settings(void)
 	struct ap_section *s = ap_settings->sects;
 	size_t sects_cnt = 0;
 
-	while (s[sects_cnt].opts) {
+	while(s[sects_cnt].opts) {
 		struct ap_option *o = s[sects_cnt].opts;
 
 		size_t opts_cnt = 0;
 
-		while (o[opts_cnt].name) {
+		while(o[opts_cnt].name) {
 			++opts_cnt;
 		}
 
@@ -286,7 +280,7 @@ static void sort_and_setup_settings(void)
 static void undo_setup_settings(void)
 {
 	struct ap_section *s = ap_settings->sects;
-	while (s->opts != ap_internal_opts)
+	while(s->opts != ap_internal_opts)
 		++s;
 	s->opts = NULL;
 	s->parser = NULL;
@@ -305,14 +299,13 @@ static void undo_setup_settings(void)
  */
 static int parse_option(struct ap_section *s, struct ap_option *o, const char *arg, bool arg_explicit)
 {
-	if (!arg && o->arg)
+	if(!arg && o->arg)
 		arg_parse_error("option '--%s' requires an argument", o->name);
 
-	if (arg && !o->arg) {
-		if (arg_explicit)
-			arg_parse_error(
-				"option '--%s' does not require an argument", o->name);
-		else if (arg[0] != '-')
+	if(arg && !o->arg) {
+		if(arg_explicit)
+			arg_parse_error("option '--%s' does not require an argument", o->name);
+		else if(arg[0] != '-')
 			arg_parse_error("too many arguments");
 		else
 			arg = NULL;
@@ -340,18 +333,18 @@ static int process_option(const char *o_name, const char *arg)
 	do {
 		struct ap_option *o = s->opts;
 
-		while (o->name) {
+		while(o->name) {
 			unsigned i = 0;
 			while(o_name[i] && o->name[i] == o_name[i])
 				++i;
 
-			if (o_name[i] == o->name[i])
+			if(o_name[i] == o->name[i])
 				return parse_option(s, o, arg, false);
 
-			if (max_s == i)
+			if(max_s == i)
 				cand_o = NULL;
 
-			if (max_s < i) {
+			if(max_s < i) {
 				max_s = i;
 				cand_o = o;
 				cand_s = s;
@@ -359,15 +352,15 @@ static int process_option(const char *o_name, const char *arg)
 
 			++o;
 		}
-	} while ((s++)->opts != ap_internal_opts);
+	} while((s++)->opts != ap_internal_opts);
 
-	if (!max_s || (o_name[max_s] && o_name[max_s] != '='))
+	if(!max_s || (o_name[max_s] && o_name[max_s] != '='))
 		arg_parse_error("unrecognized option '--%s'", o_name);
 
-	if (!cand_o)
+	if(!cand_o)
 		arg_parse_error("ambiguous option '--%s'", o_name);
 
-	if (o_name[max_s] == '=')
+	if(o_name[max_s] == '=')
 		return parse_option(cand_s, cand_o, &o_name[max_s + 1], true);
 
 	return parse_option(cand_s, cand_o, arg, false);
@@ -390,15 +383,15 @@ void arg_parse_run(struct ap_settings *ap_s, char **argv)
 	struct ap_section *s = ap_s->sects;
 	do {
 		s->parser(AP_KEY_INIT, NULL);
-	} while ((s++)->opts != ap_internal_opts);
+	} while((s++)->opts != ap_internal_opts);
 
 	++argv;
-	while (*argv) {
+	while(*argv) {
 		const char *str = *argv;
-		if (str[0] != '-')
+		if(str[0] != '-')
 			arg_parse_error("too many arguments");
 
-		if (str[1] != '-')
+		if(str[1] != '-')
 			arg_parse_error("invalid option -- '%s'", &str[1]);
 
 		argv += process_option(&str[2], *(argv + 1));
@@ -408,7 +401,7 @@ void arg_parse_run(struct ap_settings *ap_s, char **argv)
 	s = ap_s->sects;
 	do {
 		s->parser(AP_KEY_FINI, NULL);
-	} while ((s++)->opts != ap_internal_opts);
+	} while((s++)->opts != ap_internal_opts);
 
 	undo_setup_settings();
 }
@@ -437,9 +430,7 @@ void arg_parse_error(const char *fmt, ...)
 	vfprintf(stderr, fmt, args);
 	va_end(args);
 
-	fprintf(stderr,
-		"\nTry `%s --help' or `%s --usage' for more information.\n",
-		ap_pname, ap_pname);
+	fprintf(stderr, "\nTry `%s --help' or `%s --usage' for more information.\n", ap_pname, ap_pname);
 
 	exit(64);
 }

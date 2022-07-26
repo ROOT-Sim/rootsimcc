@@ -1,0 +1,3 @@
+[submodule "subprojects/core"]
+	path = subprojects/core
+	url = https://github.com/ROOT-Sim/core

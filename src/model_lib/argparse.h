@@ -1,5 +1,5 @@
 /**
- * @file argparse/arg_parse.h
+ * @file model_lib/argparse.h
  *
  * @brief Command line option parser
  *
@@ -10,7 +10,7 @@
  */
 #pragma once
 
-/// A single parsable ommand line option
+/// A single parsable command line option
 struct ap_option {
 	/// The long option name
 	const char *name;
