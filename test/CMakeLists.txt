@@ -8,6 +8,3 @@ function(test_program name)
     add_test(NAME test_${name} COMMAND test_${name})
     set_tests_properties(test_${name} PROPERTIES TIMEOUT 50)
 endfunction()
-
-test_program(reflect reflect.c)
-test_program(compiler compiler.c)
