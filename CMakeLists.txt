@@ -27,9 +27,3 @@ add_subdirectory(test)
 
 # Generate and inspect documentation
 add_subdirectory(docs)
-
-ExternalProject_Add(core
-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/subprojects/core
-    CMAKE_ARGS -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    TEST_BEFORE_INSTALL 1
-)
