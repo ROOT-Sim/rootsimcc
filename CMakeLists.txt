@@ -6,34 +6,20 @@ set(PROJECT_VERSION 3.0.0-alpha.3)
 set(PROJECT_DESCRIPTION "The ROOT-Sim C Compiler")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+include(ExternalProject)
+
 add_definitions(-DROOTSIM_VERSION=${PROJECT_VERSION})
+add_compile_options(-Wall -Wextra -pedantic)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(LLVM REQUIRED CONFIG)
-find_package(CLANG REQUIRED CONFIG)
+find_package(MPI REQUIRED)
 
-include_directories(src)
-
-# Build the compiler, the plugins, the userspace libraries
-add_executable(rootsimcc
-        src/compiler/rootsimcc.c
-        src/datatypes/dynstr.c
-)
-
-add_library(rsmeminstr SHARED
-        src/plugins/rootsim-cc_llvm.cpp
-)
-
-add_library(rsmodel STATIC
-        src/lib/config/jsmn.c
-        src/lib/config/reflect.c
-        src/datatypes/vector.c
-        src/lib/argparse/argparse.c
-)
+add_subdirectory(src)
 
 # Run the tests
 enable_testing()
